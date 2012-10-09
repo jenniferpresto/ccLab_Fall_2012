@@ -1,6 +1,6 @@
 Hi, ya'll,
 
-Here are the link to my videos, plus my schematic and calculations.
+Here are the links to my videos, plus my schematic and calculations.
 
 I think this will be fun -- I have zero experience with this, and I'm looking forward to learning all about it.  I have some questions that came up while doing this assignment, and I'd love to talk about them in class, if others want to, too:
 
@@ -11,6 +11,12 @@ I'd like to talk more about the calculations in a series.  Say you put four LEDs
 What is the Vin pin in the Arduino?
 
 Where do watts come in to all this?  What does it mean to have a 1/4 or 1/6 watt resistor?
+
+Here is a video of three LEDs in parallel. Here are two in series. And here are three in series. The last ones are very dim, so the demonstration is in the dark.
+
+Finally, here is the schematic with the calculations (voltage is 5v total and resistance is 200 ohms on all)—note: I updated this picture to show correct labeling of the circuits:
+
+The text of this post (minus the links) is also on github.
 
 Looking forward to tomorrow's class!
 
