@@ -1,0 +1,17 @@
+Hi, ya'll,
+
+Here are the link to my videos, plus my schematic and calculations.
+
+I think this will be fun -- I have zero experience with this, and I'm looking forward to learning all about it.  I have some questions that came up while doing this assignment, and I'd love to talk about them in class, if others want to, too:
+
+I built a circuit -- not posted -- that used two LEDs, each of which had a forward voltage of 3.0v, in a series.  Why did they light up at all?  Why didn't the 6.0v total between the LEDs eat up the entire voltage coming from the power supply (5v)?  Likewise, I posted a picture of a three-LED series circuit using LEDs with a forward voltage of 1.8, and I'm not sure why that lit up.
+
+I'd like to talk more about the calculations in a series.  Say you put four LEDs in a series with no resistor.  There shouldn't be enough voltage to light them.  Are they effectively acting as resistors, or is it possible to not have enough voltage to light them, but still to have enough current to blow them out?
+
+What is the Vin pin in the Arduino?
+
+Where do watts come in to all this?  What does it mean to have a 1/4 or 1/6 watt resistor?
+
+Looking forward to tomorrow's class!
+
+Jennifer
