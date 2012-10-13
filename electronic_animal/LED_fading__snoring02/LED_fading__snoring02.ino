@@ -1,30 +1,34 @@
 /*
-* Jennifer Presto
- * CCLab Homework
- * October 16, 2012
- *
- * Assignment is to create an animal.
- * Ultimate goal:
- * When animal put in dark, LEDs fade
- * and it starts to snore.
- *
- * Audio code adapted from High-Low Tech Group at MIT
- * Media Lab.
- *
- * Library and source code can be found here:
- * http://hlt.media.mit.edu/?p=1963
+ *********************************************************
+ * Jennifer Presto                                       *
+ * CCLab Homework                                        *
+ * October 16, 2012                                      *
+ *                                                       *
+ * Assignment is to create an animal.                    *
+ * Ultimate goal:                                        *
+ * When animal put in dark, LEDs fade                    *
+ * and it starts to snore.                               *
+ *                                                       *
+ * Audio code adapted from High-Low Tech Group at MIT    *
+ * Media Lab.                                            *
+ *                                                       *
+ * Library and source code can be found here:            *
+ * http://hlt.media.mit.edu/?p=1963                      *
+ *********************************************************
  */
 
 // this version includes snoring sound
-// (bug: fading happens only the first two times, then LED switches
-// all the way off)
+// Note: LEDs attached to pin 5.
+// Because of sound function, PWM breaks in pins 3, 9, 10, 11,
+// and those pins are digital only.
+// LEDs therefore attached to pin #5 so fading works.
 
 
 #include <PCM.h>
 
 
 const int sensorPin = A0; //light sensor
-const int ledPin = 3; // pin for LED; must be PWM pin
+const int ledPin = 5; // pin for LED; must be PWM pin
 const int speakerPin = 11;
 int sensorValue = 0; //variable to store value from light sensor
 boolean awake = true;
@@ -47,7 +51,6 @@ void loop(){
   
   if (sensorValue<500 && awake){
 //    delay(500);
-//    analogWrite(ledPin, 255);
     fadeLed();
     awake = false;
   }
