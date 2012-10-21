@@ -13,7 +13,7 @@ October 16, 2012
  
  The circuit:
  Speaker attached to pin 13.
- Tilt sensor attached to pin 2 with __ resistor.
+ Tilt sensor attached to pin 2 with 1000k resistor.
  
  */
 
