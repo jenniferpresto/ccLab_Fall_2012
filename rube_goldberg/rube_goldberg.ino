@@ -26,7 +26,7 @@
 #include <Servo.h>
 
 const int buttonPin = 2; //number for pushbutton
-const int photoPin = 5; //number for Photosensor pin (PWM)
+const int photoPin = A0; //number for Photosensor pin (PWM)
 const int motorPin = 9; //number for motor pin (PWM)
 const int pirPin = 4; //number for PIR pin
 
@@ -35,12 +35,14 @@ const int ledPin2 = 13; //second LED pin (big finish)
 
 Servo littleMotor; //creates servo object to control the little motor
 
-int motorPos = 0; //variable for controlling motor's position
 int buttonState = 0; //variable for reading pushbutton state
 int lastButtonState = 0; //for debounce code for button
 int reading = 0; //for debounce for button
 long lastDebounceTime = 0; //for debounce for button
 long debounceDelay = 0; // for debounce for button
+
+int motorPos = 0; //variable for controlling motor's position
+int photoSensorVal = 0;
 
 //booleans for different stages of the machine
 boolean buttonPush = false;
@@ -86,13 +88,42 @@ void loop(){
 
   if(buttonPush){
     digitalWrite(ledPin1, buttonState);
+    lightOn = true;
+  }
+  
+  // when LED light comes on, reads photo sensor
+  if(lightOn){
+    photoSensorVal = analogRead(photoPin);
+  }
+  
+  // when photosensor is over 800 (LED makes it about 985, dim is at
+  // about 735), trips photoTrip boolean
+  if (photoSensorVal > 800){
+    photoTrip = true;
+  }
+  
+  // when photoTrip boolean is tripped, servo activated
+  // moves for one second
+  if (photoTrip && motorRun == false) {
+    motorPos = 100;
+    littleMotor.write(motorPos);
+    delay(3000);
+    motorPos = 92;
+    littleMotor.write(motorPos);
+    motorRun = true;
   }
   
   
+  
+  
 
-  Serial.print(buttonState);
-  Serial.print(" ");
-  Serial.println(buttonPush);
+//  Serial.print(buttonState);
+//  Serial.print(" ");
+//  Serial.println(buttonPush);
+Serial.print("photosensor: ");
+Serial.println(photoSensorVal);
+Serial.print("motor: ");
+Serial.println(motorPos);
 }
 
 
