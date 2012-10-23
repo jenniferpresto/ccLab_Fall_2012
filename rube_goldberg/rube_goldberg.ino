@@ -26,6 +26,7 @@
  * Servo motor, no resistor, to pin 9            *
  * Dominoes set off by motor, trip motion sensor *
  * PIR motion detector, no resistor, to pin 4    *
+ * LED2, no resistor, to pin 13                  *
  *                                               *
  *************************************************
  
