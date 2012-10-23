@@ -42,7 +42,8 @@ long lastDebounceTime = 0; //for debounce for button
 long debounceDelay = 0; // for debounce for button
 
 int motorPos = 0; //variable for controlling motor's position
-int photoSensorVal = 0;
+int photoSensorVal = 0; // for reading photo sensor's input
+int pirSensorVal = 0; //for reading PIR sensor's input
 
 //booleans for different stages of the machine
 boolean buttonPush = false;
@@ -54,6 +55,9 @@ boolean motionDetect = false;
 
 void setup(){
   Serial.begin(9600);
+  Serial.println("Warming up...");
+  delay(20000); //for motion sensor to warm up
+  Serial.println("Ready!");
   littleMotor.attach(9); //attaches servo on pin 9 to the servo object
   //initialize all the pins
   pinMode(buttonPin, INPUT);
@@ -103,7 +107,7 @@ void loop(){
   }
   
   // when photoTrip boolean is tripped, servo activated
-  // moves for one second
+  // moves for one second, trips motorRun boolean
   if (photoTrip && motorRun == false) {
     motorPos = 100;
     littleMotor.write(motorPos);
@@ -113,6 +117,22 @@ void loop(){
     motorRun = true;
   }
   
+  // when motion sensor is tripped,
+  // read sensor and trips boolean
+  if (motorRun) {
+    pirSensorVal = digitalRead(4);
+  }
+  
+  if(pirSensorVal == 1){
+    motionDetect = true;
+  }
+  
+  if(motionDetect){
+    digitalWrite(ledPin2, HIGH);
+  }
+    
+  
+    
   
   
   
@@ -120,10 +140,12 @@ void loop(){
 //  Serial.print(buttonState);
 //  Serial.print(" ");
 //  Serial.println(buttonPush);
-Serial.print("photosensor: ");
-Serial.println(photoSensorVal);
-Serial.print("motor: ");
-Serial.println(motorPos);
+//Serial.print("photosensor: ");
+//Serial.println(photoSensorVal);
+//Serial.print("motor: ");
+//Serial.println(motorPos);
+Serial.print("motion sensor: ");
+Serial.println(pirSensorVal);
 }
 
 
