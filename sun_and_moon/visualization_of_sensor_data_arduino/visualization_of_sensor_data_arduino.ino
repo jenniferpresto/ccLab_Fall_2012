@@ -16,6 +16,10 @@
  * and from Arduino Invader by Matt Griffis, available here:          *
  * http://www.openprocessing.org/sketch/77167                         * 
  *                                                                    *
+ * Circuit wired as follows:                                          *
+ * Button with 10K ohm resistor to pin 2                              *
+ * Photocell with 10K ohm resistor to pin A0                          *
+ *                                                                    *
  **********************************************************************
  */
 
