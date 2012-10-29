@@ -25,8 +25,17 @@
 import processing.serial.*;
 Serial myPort;
 
+//position of sun and moon
 float xPos;
 float yPos;
+
+//color of the sky
+float dayR, dayG, dayB;
+float nightR, nightG, nightB;
+
+// general range of photocell numbers, for easy calibration
+float averageBottom = 120;
+float averageTop = 820;
 
 int numSensors = 2; // here using photocell and button, so two sensors
 int[] displayArduinoVal = new int[numSensors]; // global variable to read variables from serialEvent method
@@ -37,6 +46,8 @@ float averageVal; // will be the average of the photoVal array
 
 PImage sun;
 PImage moon;
+PImage dayScenery;
+PImage nightScenery;
 
 void setup() {
   size(600, 600);
@@ -46,12 +57,17 @@ void setup() {
   myPort.bufferUntil('\n'); // runs serialEvent() method only when get a new line
   sun = loadImage("sun.png");
   moon = loadImage("moon.png");
+  dayScenery = loadImage("day_scenery.png");
+  nightScenery = loadImage("night_scenery.png");
   imageMode(CENTER);
+  
   smooth();
+  
   // initialize all elements of displayArduinoVal array to 0
   for (int i=0; i<numSensors; i++) {
     displayArduinoVal[i] = 0;
   }
+
   // initialize all elements of sensorVal array to 0
   for (int i=0; i<photoDataPoints; i++) {  
     photoVal[i] = 0;
@@ -65,6 +81,7 @@ void draw() {
   for (int i=0; i<photoVal.length-1; i++) {
     photoVal[i] = photoVal[i+1];
   }
+
   // in final element of photoVal, insert latest reading of photocell,
   // which is always the [0] index element of displayArduinoVal
   photoVal[photoVal.length-1]=displayArduinoVal[0];
@@ -74,22 +91,33 @@ void draw() {
 
   //  print("The average of the values is ");
   //  println(averageVal);
+  
+  //determine color of sky
+  dayR = map(averageVal, averageBottom, averageTop, 100, 68);
+  dayG = map(averageVal, averageBottom, averageTop, 21, 224);
+  dayB = map(averageVal, averageBottom, averageTop, 100, 250);
+  
+  nightR = map(averageVal, averageBottom, averageTop, 17, 59);
+  nightG = map(averageVal, averageBottom, averageTop, 23, 42);
+  nightB = map(averageVal, averageBottom, averageTop, 46, 165);
 
   //daytime animation (button not pressed)
   if (displayArduinoVal[1] == 0) {
-    yPos = height - map(averageVal, 120, 820, 0, height);
+    yPos = height - map(averageVal, averageBottom, averageTop, 50, height-50);
     noStroke();
     fill(203, 199, 41);
-    background(106, 33, 67);
+    background(dayR, dayG, dayB);
     image(sun, xPos, yPos, 150, 150);
+    image(dayScenery, width/2, height/2);
   }
   //nighttime animation (button pressed)
   if (displayArduinoVal[1] == 1) {
-    yPos = map(averageVal, 120, 820, 0, height);
+    yPos = map(averageVal, averageBottom, averageTop, 75, height-50);
     noStroke();
     fill(242, 239, 203);
-    background(17, 23, 46);
+    background(nightR, nightG, nightB);
     image(moon, xPos, yPos, 150, 150);
+    image(nightScenery, width/2, height/2);
   }
 }
 
@@ -110,9 +138,7 @@ void serialEvent(Serial myPort) {
   }
 }
 
-
 // function to calculate average of all values of sensorVal
-
 void average() {
   float total = 0;
   for (int j=0; j<photoVal.length; j++) {
