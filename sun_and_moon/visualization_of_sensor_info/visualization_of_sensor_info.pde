@@ -86,7 +86,7 @@ void draw() {
   // which is always the [0] index element of displayArduinoVal
   photoVal[photoVal.length-1]=displayArduinoVal[0];
 
-  //average the value of all those elements ofphotoVal with function below
+  //average the value of all the elements within photoVal with function below
   average();
 
   //  print("The average of the values is ");
