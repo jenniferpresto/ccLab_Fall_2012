@@ -138,7 +138,7 @@ void serialEvent(Serial myPort) {
   }
 }
 
-// function to calculate average of all values of sensorVal
+// function to calculate average of all values of photoVal
 void average() {
   float total = 0;
   for (int j=0; j<photoVal.length; j++) {
