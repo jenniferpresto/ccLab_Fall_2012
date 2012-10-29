@@ -3,15 +3,15 @@ import processing.serial.*;
 float xPos;
 float yPos;
 
-  /* -----
-   Need to assign data coming into serial port to a variable:
-   Data from photocell is noisy, and goes through cycle of 6 readings,
-   only one of which seems to respond to the light.
-   Therefore use the average of many bytes to come through, keeping
-   the number divisible by six.
-   Note: when used 6 data points only, average was very noisy at the bottom.
-   Increased to 600 to get much smoother, although delayed, reaction.
-   ------ */
+/* -----
+ Need to assign data coming into serial port to a variable:
+ Data from photocell is noisy, and goes through cycle of 6 readings,
+ only one of which seems to respond to the light.
+ Therefore use the average of many bytes to come through, keeping
+ the number divisible by six.
+ Note: when used 6 data points only, average was very noisy at the bottom.
+ Increased to 600 to get much smoother, although delayed, reaction.
+ ------ */
 
 int dataPoints = 600;
 
@@ -35,12 +35,16 @@ void draw() {
 }
 
 void serialEvent(Serial myPort) {
+  //create an array that constantly shifts to store the last
+  //batch of data points from the sensor
   for (int i=0; i<sensorVal.length-1; i++) {
     sensorVal[i] = sensorVal[i+1];
   }
   sensorVal[sensorVal.length-1]=myPort.read();
 
+  //average the value of all those points with function below
   average();
+  
   print("The average of the values is ");
   println(averageVal);
   xPos = width/2;
