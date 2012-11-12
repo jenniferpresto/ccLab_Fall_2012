@@ -1,18 +1,15 @@
 // this is the player
 
 class Dot {
-  float x;
-  float y;
+  float x, y; //position
+  float r; //radius
   float speed;
 
   Dot(float _x, float _y) {
     x = _x;
     y = _y;
+    r = 10;
     speed = 3;
-  }
-
-  void display() {
-    ellipse(x, y, 10, 10);
   }
 
   void move() {
@@ -28,6 +25,10 @@ class Dot {
     if (y > reddestY) {
       y -= speed;
     }
+  }
+
+  void display() {
+    ellipse(x, y, r, r);
   }
 }
 

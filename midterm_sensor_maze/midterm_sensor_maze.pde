@@ -1,21 +1,42 @@
-// this version adds obstacles and levels
 
-// color tracker adapted from example by Daniel Shiffman,
-// available here:
-// http://www.learningprocessing.com/examples/chapter-16/example-16-11/
-
-// Color extraction from Processing example FrameDifferencing, by Golan Levin
-
+/*
+******************************************************************************
+ * Focus Maze                                                                 *
+ * Jennifer G. Presto                                                         *
+ * November 13, 2012                                                          *
+ *                                                                            *
+ * CCLab midterm                                                              *
+ *                                                                            *
+ * Use a red wand to move your dot to the exit                                *
+ * without touching any of the obstacles or the walls                         *
+ *                                                                            *
+ * Acknowledgements:                                                          *
+ * color tracker adapted from example by Daniel Shiffman,                     *
+ * available here:                                                            *
+ * http://www.learningprocessing.com/examples/chapter-16/example-16-11/       *
+ *                                                                            *
+ * Color extraction from Processing example FrameDifferencing, by Golan Levin *
+ *                                                                            *
+ * Level ArrayLists inspired by notKirby by Matt Griffis,                     *
+ * available here:                                                            *
+ * https://github.com/jmatthewgriffis/notKirby/tree/master/game               *
+ *                                                                            *
+ * this version includes rudimentary collision detection                      *
+ ******************************************************************************
+ */
 import processing.video.*;
 
-Level level;
-Capture video;
-Dot dot;
+int gameState;    // where we are in the game
+Level level;      // what level is showing
+Capture video;    // following red wand
+Dot dot;          // this is you
 
 int reddestX = 0; // x coordinate of reddest pixel
-int reddestY = 0; // y coordinat of reddest pixel
+int reddestY = 0; // y coordinate of reddest pixel
 
-color trackedColor; // which color pixel to track
+color trackedColor; // which color pixel to track (i.e., red)
+
+boolean collide;
 
 void setup() {
   size(640, 480, P2D);
@@ -26,6 +47,7 @@ void setup() {
 
   dot = new Dot(width/2, height/2);
   level = new Level(1, true, true);
+  level.setUpLevel(); // set up first level, which will always be level 1, no reversing
 
   background(255);  
   ellipseMode(CENTER);
@@ -35,6 +57,14 @@ void setup() {
 }
 
 void draw() {
+  //  // INSTRUCTIONS -------------
+  //  if (gameState == 0) {
+  //  }
+  //  
+  //  // STARTING GAME ------------
+  //  if (gameState == 1){
+  //  }
+
   if (video.available()) {
     video.read();
     //    image(video, 0, 0);
@@ -72,19 +102,31 @@ void draw() {
         }
       }
     }
-    
+
     // set up, then display the level
-    level.setUpLevel();
     level.display();
 
     // draw a circle around reddest pixel
     noFill();
     stroke(0);
+    rectMode(CENTER); // little rectangle centered around reddest pixel
     rect(reddestX, reddestY, 10, 10);
     fill(255, 0, 0);
     noStroke();
+
+    //move the dot to follow the rectangle
     dot.move();
     dot.display();
+
+    //collision detection
+    for (int i=0; i<level.layout.size(); i++) { // iterate through all Obstacles, including walls
+      // see if Dot is hitting any of them
+      Obstacle testHit = (Obstacle) level.layout.get(i); // pull each Obstacle from level to test
+      if(dot.x > testHit.x && dot.x < testHit.x + testHit.w && dot.y > testHit.y && dot.y < testHit.y + testHit.h){
+        collide = true;
+        println("ouch!");
+      }
+    }
   }
 }
 
