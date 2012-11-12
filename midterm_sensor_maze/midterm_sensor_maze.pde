@@ -8,37 +8,54 @@
  * CCLab midterm                                                              *
  *                                                                            *
  * Use a red wand to move your dot to the exit                                *
- * without touching any of the obstacles or the walls                         *
+ * without touching any of the obstacles or the walls.                        *
+ *                                                                            *
+ * Game grows harder as movement changes and distracting information appears. *
  *                                                                            *
  * Acknowledgements:                                                          *
- * color tracker adapted from example by Daniel Shiffman, available here:     *
+ * Color tracker adapted from example by Daniel Shiffman, available here:     *
  * http://www.learningprocessing.com/examples/chapter-16/example-16-11/       *
  *                                                                            *
  * Color extraction from Processing example FrameDifferencing, by Golan Levin *
+ *                                                                            *
+ * Scrolling weather adapted from example by Daniel Shiffman, available here: *
+ * http://www.learningprocessing.com/examples/chapter-17/example-17-3/        *
  *                                                                            *
  * Level ArrayLists inspired by conversations with Matt Griffis and           *
  * his notKirby sketch, available here:                                       *
  * https://github.com/jmatthewgriffis/notKirby/tree/master/game               *
  *                                                                            *
- * This version includes four levels.                                         *
+ * Final version                                                              *
  ******************************************************************************
  */
 
 import processing.video.*;
+import com.onformative.yahooweather.*;
 
-int gameState;      // where we are in the game
-int round;          // how far the player has gotten
-Level level;        // what level is showing
-int levelNumber;    // for picking new levels
-boolean pickUD;     // for picking up-down motion of new levels
-boolean pickLR;     // for picking left-right motion of new levels
 
-Capture video;      // camera object; follows red wand
-Dot dot;            // this is you
+int gameState;        // where we are in the game
+int round;            // how far the player has gotten
+Level level;          // what level is showing
+int levelNumber;      // for picking new levels
+boolean pickUD;       // for picking up-down motion of new levels
+boolean pickLR;       // for picking left-right motion of new levels
 
-int loc;            // global variable for texting all pixels
-int reddestX = 0;   // x coordinate of reddest pixel
-int reddestY = 0;   // y coordinate of reddest pixel
+Capture video;        // camera object; follows red wand
+Dot dot;              // this is you
+
+YahooWeather weather; // weather report
+int updateIntervalMillis;    // interval for updating the weather
+// collection of locations to use
+int[] woeid = {
+  2459115, 2483145, 2381457, 753692, 2423945, 2269179, 24865698, 2465512, 615702
+};
+int woeidIndex;
+int weatherX;         // x coordinate of weather information
+
+
+int loc;              // global variable for testing all pixels
+int reddestX = 0;     // x coordinate of reddest pixel
+int reddestY = 0;     // y coordinate of reddest pixel
 
 color trackedColor; // which color pixel to track (i.e., red)
 
@@ -65,6 +82,11 @@ void setup() {
   round = 1;
   dot = new Dot(width/2, height/2); // always start in the middle
 
+  updateIntervalMillis = 30000; // updates every 30 seconds
+  woeidIndex = 0;
+  weather = new YahooWeather(this, woeid[woeidIndex], "f", updateIntervalMillis);
+  weatherX = width; // initializing so starts offscreen
+
   //  The following items are all initialized in the keyPressed function below
   //  levelNumber = 1;
   //  pickUD = true;
@@ -85,6 +107,7 @@ void setup() {
 }
 
 void draw() {
+  weather.update();
   // Keeping track of what's going on
   //  println("Game State: " + gameState + "    Level: " + level.whichLevel + "   number of Obstacles:" + level.layout.size());
 
@@ -180,6 +203,8 @@ void draw() {
       if (!started) {
         if ((dot.x > 40 + dot.d * 0.5) && (dot.x < 110 - dot.d * 0.5) && (dot.y > 370 + dot.d * 0.5) && (dot.y < 440 - dot.d * 0.5)) {
           startTimeCurrent = millis() - lastStartTime;
+          fill(255);
+          textAlign(CENTER);
           textFont(timerFont);
           if (startTimeCurrent < 1000) {
             text("3", width/2, height/2);
@@ -227,6 +252,7 @@ void draw() {
     fill(43, 75, 67); // turn circle green
     ellipse(dot.x, dot.y, dot.d, dot.d);
     fill(255);
+    textAlign(CENTER);
     textFont(instructionFont);
     text("Ouch!  You hit the wall!", width/2, height/2);
     text("Press the space bar to start over", width/2, height/2 + 30);
@@ -235,7 +261,7 @@ void draw() {
 
   // GAMESTATE 3: YOU WIN; GO TO NEXT ROUND -------------
   if (gameState == 3) {
-    // reset everything for the next round (just once)
+    // reset everything for the next round (just once, hence the boolean nextLevel)
     if (!nextLevel) {
       determineNextLevel();
       nextLevel = true;
@@ -244,6 +270,7 @@ void draw() {
     // tell the player what the level will be
     background(255);
     fill(100);
+    textAlign(CENTER);
     textFont(instructionFont);
     text("Congratulations!", width/2, 60);
     text("Get ready for the next round!", width/2, 100);
@@ -268,11 +295,11 @@ void draw() {
     fill(100);
     text("Hit the space bar to continue.", width/2, 380);
   } // end of gameState 3
-}
+} // end of draw function
 
 
 void determineNextLevel() {
-  levelNumber = int(random(1, 5)); // depends how many levels
+  levelNumber = int(random(1, 5)); // depends on how many levels there are
   if (int(random(0, 2)) == 0) {
     pickUD = true;
   } 
