@@ -20,10 +20,11 @@
  * his notKirby sketch, available here:                                       *
  * https://github.com/jmatthewgriffis/notKirby/tree/master/game               *
  *                                                                            *
- * this version incorporates gameStates                                       *
- * But does not yet incorporate a start state                                 *
+ * This version includes mechanic for starting each level by hovering in      *
+ * the white box at the bottom left corner.                                   *
  ******************************************************************************
  */
+
 import processing.video.*;
 
 int gameState;      // where we are in the game
@@ -45,6 +46,14 @@ color trackedColor; // which color pixel to track (i.e., red)
 boolean started;    // whether each level has started
 boolean collide;    // collision detection
 boolean nextLevel;  // whether new level parameters have been determined
+
+int lastStartTime;  // variables for starting each level
+int startTimeCurrent;
+
+PFont timerFont;
+PFont instructionFont;
+PFont smallestFont;
+
 
 void setup() {
   size(640, 480, P2D);
@@ -69,21 +78,32 @@ void setup() {
   textAlign(CENTER);
 
   trackedColor = color(255, 0, 0); // will track reddest pixel
+
+  timerFont = loadFont("Helvetica-Bold-64.vlw");
+  instructionFont = loadFont("Helvetica-Bold-32.vlw");
+  smallestFont = loadFont("Helvetica-Bold-18.vlw");
 }
 
 void draw() {
-  println("Game State: " + gameState + "    Level: " + level.whichLevel + "   number of Obstacles:" + level.layout.size());
+  // Keeping track of what's going on
+  //  println("Game State: " + gameState + "    Level: " + level.whichLevel + "   number of Obstacles:" + level.layout.size());
+
   // GAMESTATE 0: INSTRUCTIONS -------------
   if (gameState == 0) {
     background(255);
     fill(0);
-    text("Welcome to the Focus Maze", width/2, 20);
-    text("Move the wand to direct the red dot", width/2, 60);
-    text("For your first level, the dot will move with your wand", width/2, 100);
-    text("After that, the up/down or left/right motions may be reversed", width/2, 140);
-    text("Don't hit the obstacles", width/2, 180);
-    text("Hold the dot in the white square at the bottom left for three seconds to begin", width/2, 220);
-    text("Hit the space bar to begin", width/2, 260);
+    textFont(instructionFont);
+    text("Welcome to the Focus Maze.", width/2, 40);
+    text("Move the wand to direct the red dot.", width/2, 70);
+    text("For your first level,", width/2, 120);
+    text("the dot will move with your wand.", width/2, 150);
+    text("After that,", width/2, 180);
+    text("up/down or left/right motions", width/2, 210);
+    text("may be reversed.", width/2, 240);
+    text("Don't hit the obstacles.", width/2, 290);
+    text("Hold the dot in the white square", width/2, 340);
+    text("to start the game.", width/2, 370);
+    text("Hit the space bar to begin.", width/2, 420);
   }
 
   // GAMESTATE 1: STARTING AND PLAYING GAME ------------
@@ -154,7 +174,32 @@ void draw() {
       dot.move();
       dot.display();
 
-      //collision detection
+      // Gameplay now depends on whether the game has STARTED.
+      // Player must hover in the white box at the bottom left corner for three seconds
+      // to actually start to play.
+      if (!started) {
+        if ((dot.x > 40 + dot.d * 0.5) && (dot.x < 110 - dot.d * 0.5) && (dot.y > 370 + dot.d * 0.5) && (dot.y < 440 - dot.d * 0.5)) {
+          startTimeCurrent = millis() - lastStartTime;
+          textFont(timerFont);
+          if (startTimeCurrent < 1000) {
+            text("3", width/2, height/2);
+          }
+          if (startTimeCurrent >= 1000 && startTimeCurrent < 2000) {
+            text("2", width/2, height/2);
+          }
+          if (startTimeCurrent >= 2000 && startTimeCurrent < 3000) {
+            text("1", width/2, height/2);
+          }
+          if (startTimeCurrent >= 3000) {
+            started = true;
+          }
+        } 
+        else {
+          lastStartTime = millis();
+        }
+      }
+
+      //collision detection (only after round has started)
       for (int i=0; i<level.layout.size(); i++) { // iterate through all Obstacles, including walls
         // see if Dot is hitting any of them
         Obstacle testHit = (Obstacle) level.layout.get(i); // pull each Obstacle from level to test
@@ -182,8 +227,10 @@ void draw() {
     fill(43, 75, 67); // turn circle green
     ellipse(dot.x, dot.y, dot.d, dot.d);
     fill(255);
+    textFont(instructionFont);
     text("Ouch!  You hit the wall!", width/2, height/2);
-    text("Press the space bar to start over", width/2, height/2 + 20);
+    text("Press the space bar to start over", width/2, height/2 + 30);
+    text("with normal movement.", width/2, height/2 + 60);
   }
 
   // GAMESTATE 3: YOU WIN; GO TO NEXT ROUND -------------
@@ -196,23 +243,30 @@ void draw() {
 
     // tell the player what the level will be
     background(255);
-    text("Congratulations!", width/2, 20);
-    text("Get ready for the next round!", width/2, 60);
-    text("In the next round", width/2, 100);
-    text("Your up-down motion will be", width/2, 140);
+    fill(100);
+    textFont(instructionFont);
+    text("Congratulations!", width/2, 60);
+    text("Get ready for the next round!", width/2, 100);
+    text("In the next round", width/2, 140);
+    text("Your up-down motion will be", width/2, 180);
+    fill(98, 102, 167);
     if (pickUD) {
-      text("Normal", width/2, 180);
+      text("Normal", width/2, 230);
     }
     if (!pickUD) {
-      text("Reversed", width/2, 180);
+      text("Reversed", width/2, 230);
     }
-    text("Your left-right motion will be", width/2, 220);
+    fill(100);
+    text("Your left-right motion will be", width/2, 280);
+    fill(98, 102, 167);
     if (pickLR) {
-      text("Normal", width/2, 260);
+      text("Normal", width/2, 330);
     }
     if (!pickLR) {
-      text("Reversed", width/2, 260);
+      text("Reversed", width/2, 330);
     }
+    fill(100);
+    text("Hit the space bar to continue.", width/2, 380);
   } // end of gameState 3
 }
 
@@ -239,16 +293,22 @@ void determineNextLevel() {
 void keyPressed() {
   if (key == ' ' && (gameState == 0 || gameState == 2)) {
     gameState = 1;
-    round = 0;
+    round = 1;
     collide = false;
     started = false; // no collisions until the game officially begins
     nextLevel = false; // allows next level to be picked in case of a win
+    level = new Level(1, true, true);
+    level.setUpLevel();
+    dot.x = width/2;
+    dot.y = height/2;
   }
 
   if (key == ' ' && gameState == 3) {
     gameState = 1;
     started = false;
     nextLevel = false; // allows new level to be picked in case of a win
+    dot.x = width/2;
+    dot.y = height/2;
   }
 }
 

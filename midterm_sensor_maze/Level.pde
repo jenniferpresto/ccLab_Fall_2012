@@ -25,21 +25,32 @@ class Level {
   }
 
   void display() {
-    background(100);
+    // main part of the level (including walls)
+    if (started) {
+      background(98, 102, 167);
+    }
+    if (!started) {
+      background(100);
+    }
     fill(c);
     noStroke();
     for (int i=0; i<layout.size(); i++) {
       Obstacle eachObstacle = (Obstacle) layout.get(i);
       eachObstacle.display();
     }
+
+    // white start box in bottom left corner of every level
     rectMode(CORNER);
     fill(255);
     stroke(0);
     strokeWeight(2);
     rect(40, 370, 70, 70);
     fill(0);
+    textFont(smallestFont);
     text("Round: " + round, 45, 20);
-    text("<-- Start here!", 155, 405);
+    if (!started) {
+      text("<-- Start here!", 175, 405);
+    }
     text("Exit -->", 575, 80);
   }
 
