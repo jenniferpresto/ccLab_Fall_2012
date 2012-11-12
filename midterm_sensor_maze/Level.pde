@@ -22,6 +22,37 @@ class Level {
       layout.add(new Obstacle(380, 120, 160, 40));
       layout.add(new Obstacle(320, 280, 240, 80));
     }
+
+    if (whichLevel == 2) {
+      background(100); // gray
+      c = color(216, 202, 74); // mustard
+      setUpWalls();
+      layout.add(new Obstacle(80, 160, 200, 60));
+      layout.add(new Obstacle(180, 240, 90, 170));
+      layout.add(new Obstacle(370, 120, 50, 260));
+      layout.add(new Obstacle(500, 80, 40, 60));
+      layout.add(new Obstacle(500, 200, 80, 40));
+    }
+
+    if (whichLevel == 3) {
+      background(100); //gray
+      c = color(38, 32, 73); // dark blue
+      setUpWalls();
+      layout.add(new Obstacle(90, 110, 120, 200));
+      layout.add(new Obstacle(280, 60, 210, 190));
+      layout.add(new Obstacle(130, 350, 230, 50));
+      layout.add(new Obstacle(420, 300, 140, 110));
+    }
+    
+    if (whichLevel == 4) {
+      background(100); //gray
+      c = color(117, 40, 102); // purple-gray  
+      setUpWalls();
+      layout.add(new Obstacle(170, 60, 180, 40));
+      layout.add(new Obstacle(170, 160, 250, 60));
+      layout.add(new Obstacle(70, 290, 320, 50));
+      layout.add(new Obstacle(460, 90, 70, 330));
+    }
   }
 
   void display() {

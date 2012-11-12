@@ -20,8 +20,7 @@
  * his notKirby sketch, available here:                                       *
  * https://github.com/jmatthewgriffis/notKirby/tree/master/game               *
  *                                                                            *
- * This version includes mechanic for starting each level by hovering in      *
- * the white box at the bottom left corner.                                   *
+ * This version includes four levels.                                         *
  ******************************************************************************
  */
 
@@ -66,11 +65,12 @@ void setup() {
   round = 1;
   dot = new Dot(width/2, height/2); // always start in the middle
 
-  levelNumber = 1;
-  pickUD = true;
-  pickLR = true;
-  level = new Level(levelNumber, pickUD, pickLR); // first level, which will always be level 1, no reversing
-  level.setUpLevel();
+  //  The following items are all initialized in the keyPressed function below
+  //  levelNumber = 1;
+  //  pickUD = true;
+  //  pickLR = true;
+  //  level = new Level(levelNumber, pickUD, pickLR); // first level, which will always be level 1, no reversing
+  //  level.setUpLevel();
 
   background(255);  
   ellipseMode(CENTER);
@@ -272,7 +272,7 @@ void draw() {
 
 
 void determineNextLevel() {
-  levelNumber = 1; //int(random(1, 1)); // will eventually be randomized
+  levelNumber = int(random(1, 5)); // depends how many levels
   if (int(random(0, 2)) == 0) {
     pickUD = true;
   } 
@@ -297,7 +297,7 @@ void keyPressed() {
     collide = false;
     started = false; // no collisions until the game officially begins
     nextLevel = false; // allows next level to be picked in case of a win
-    level = new Level(1, true, true);
+    level = new Level(1, true, true); // always starts over with easiest level, normal movement
     level.setUpLevel();
     dot.x = width/2;
     dot.y = height/2;
