@@ -2,13 +2,13 @@
 
 class Dot {
   float x, y; //position
-  float r; //radius
+  float d; //diameter
   float speed;
 
   Dot(float _x, float _y) {
     x = _x;
     y = _y;
-    r = 10;
+    d = 10;
     speed = 3;
   }
 
@@ -28,7 +28,7 @@ class Dot {
   }
 
   void display() {
-    ellipse(x, y, r, r);
+    ellipse(x, y, d, d);
   }
 }
 

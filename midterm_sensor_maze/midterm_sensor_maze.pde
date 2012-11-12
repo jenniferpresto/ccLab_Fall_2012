@@ -11,32 +11,40 @@
  * without touching any of the obstacles or the walls                         *
  *                                                                            *
  * Acknowledgements:                                                          *
- * color tracker adapted from example by Daniel Shiffman,                     *
- * available here:                                                            *
+ * color tracker adapted from example by Daniel Shiffman, available here:     *
  * http://www.learningprocessing.com/examples/chapter-16/example-16-11/       *
  *                                                                            *
  * Color extraction from Processing example FrameDifferencing, by Golan Levin *
  *                                                                            *
- * Level ArrayLists inspired by notKirby by Matt Griffis,                     *
- * available here:                                                            *
+ * Level ArrayLists inspired by conversations with Matt Griffis and           *
+ * his notKirby sketch, available here:                                       *
  * https://github.com/jmatthewgriffis/notKirby/tree/master/game               *
  *                                                                            *
- * this version includes rudimentary collision detection                      *
+ * this version incorporates gameStates                                       *
+ * But does not yet incorporate a start state                                 *
  ******************************************************************************
  */
 import processing.video.*;
 
-int gameState;    // where we are in the game
-Level level;      // what level is showing
-Capture video;    // following red wand
-Dot dot;          // this is you
+int gameState;      // where we are in the game
+int round;          // how far the player has gotten
+Level level;        // what level is showing
+int levelNumber;    // for picking new levels
+boolean pickUD;     // for picking up-down motion of new levels
+boolean pickLR;     // for picking left-right motion of new levels
 
-int reddestX = 0; // x coordinate of reddest pixel
-int reddestY = 0; // y coordinate of reddest pixel
+Capture video;      // camera object; follows red wand
+Dot dot;            // this is you
+
+int loc;            // global variable for texting all pixels
+int reddestX = 0;   // x coordinate of reddest pixel
+int reddestY = 0;   // y coordinate of reddest pixel
 
 color trackedColor; // which color pixel to track (i.e., red)
 
-boolean collide;
+boolean started;    // whether each level has started
+boolean collide;    // collision detection
+boolean nextLevel;  // whether new level parameters have been determined
 
 void setup() {
   size(640, 480, P2D);
@@ -45,88 +53,202 @@ void setup() {
   video = new Capture(this, width, height);
   video.start();
 
-  dot = new Dot(width/2, height/2);
-  level = new Level(1, true, true);
-  level.setUpLevel(); // set up first level, which will always be level 1, no reversing
+  gameState = 0; // start with the instructions
+  round = 1;
+  dot = new Dot(width/2, height/2); // always start in the middle
+
+  levelNumber = 1;
+  pickUD = true;
+  pickLR = true;
+  level = new Level(levelNumber, pickUD, pickLR); // first level, which will always be level 1, no reversing
+  level.setUpLevel();
 
   background(255);  
   ellipseMode(CENTER);
   rectMode(CENTER);
+  textAlign(CENTER);
 
   trackedColor = color(255, 0, 0); // will track reddest pixel
 }
 
 void draw() {
-  //  // INSTRUCTIONS -------------
-  //  if (gameState == 0) {
-  //  }
-  //  
-  //  // STARTING GAME ------------
-  //  if (gameState == 1){
-  //  }
+  println("Game State: " + gameState + "    Level: " + level.whichLevel + "   number of Obstacles:" + level.layout.size());
+  // GAMESTATE 0: INSTRUCTIONS -------------
+  if (gameState == 0) {
+    background(255);
+    fill(0);
+    text("Welcome to the Focus Maze", width/2, 20);
+    text("Move the wand to direct the red dot", width/2, 60);
+    text("For your first level, the dot will move with your wand", width/2, 100);
+    text("After that, the up/down or left/right motions may be reversed", width/2, 140);
+    text("Don't hit the obstacles", width/2, 180);
+    text("Hold the dot in the white square at the bottom left for three seconds to begin", width/2, 220);
+    text("Hit the space bar to begin", width/2, 260);
+  }
 
-  if (video.available()) {
-    video.read();
-    //    image(video, 0, 0);
+  // GAMESTATE 1: STARTING AND PLAYING GAME ------------
+  if (gameState == 1) {
+    if (video.available()) {
+      video.read();
+      //    image(video, 0, 0);
 
-    float reddest = 500; //set high; easy for first pixel to beat it
-    video.loadPixels();
+      float reddest = 500; //set high; easy for first pixel to beat it
+      video.loadPixels();
 
-    // loop through all the pixels to find x and y coordinates
-    for (int x=0; x<video.width; x++) {
-      for (int y=0; y<video.height; y++) {
-        int loc = x+y*video.width;
+      // loop through all the pixels to find x and y coordinates
+      for (int x=0; x<video.width; x++) {
+        for (int y=0; y<video.height; y++) {
 
-        // color of pixel being examined in loop
-        color currentColor = video.pixels[loc];
+          // adjust which pixel corresponds to location implement mirror
+          if (level.normalUD && level.normalLR) {
+            loc = (video.width - x - 1)+y*video.width;
+          }
+          if (level.normalUD && !level.normalLR) {
+            loc = x + y*video.width;
+          }
+          if (!level.normalUD && level.normalLR) {
+            loc = (video.width - x - 1) +(video.height - y - 1) * video.width;
+          }
+          if (!level.normalUD && !level.normalLR) {
+            loc = x + (video.height - y -1) * video.width;
+          }
 
-        float r1 = (currentColor >> 16) & 0xFF; // like red(), but faster
-        float g1 = (currentColor >> 8) & 0xFF;
-        float b1 = currentColor & 0xFF;
+          // color of pixel being examined in loop
+          color currentColor = video.pixels[loc];
 
-        // color of tracked color (originally red)
-        float r2 = (trackedColor >> 16) & 0xFF;
-        float g2 = (trackedColor >> 8) & 0xFF;
-        float b2 = trackedColor & 0xFF;
+          float r1 = (currentColor >> 16) & 0xFF; // like red(), but faster
+          float g1 = (currentColor >> 8) & 0xFF;
+          float b1 = currentColor & 0xFF;
 
-        // use distance to compare colors
-        float d = dist(r1, b1, g1, r2, b2, g2);
+          // color of tracked color (originally red)
+          float r2 = (trackedColor >> 16) & 0xFF;
+          float g2 = (trackedColor >> 8) & 0xFF;
+          float b2 = trackedColor & 0xFF;
 
-        // If currentColor is more similar to tracked Color than the last one,
-        // save the x and y coordinates
+          // use distance to compare colors
+          float d = dist(r1, b1, g1, r2, b2, g2);
 
-        if (d < reddest) {
-          reddest=d;
-          reddestX = x;
-          reddestY = y;
+          // If currentColor is more similar to tracked Color than the last one,
+          // save the x and y coordinates
+
+          if (d < reddest) {
+            reddest=d;
+            reddestX = x;
+            reddestY = y;
+          }
+        }
+      } // end of finding reddest pixel
+
+      // display the current level
+      level.display();
+
+      // draw a little square around reddest pixel
+      noFill();
+      stroke(0);
+      rectMode(CENTER); // little square centered around reddest pixel
+      rect(reddestX, reddestY, 10, 10);
+      fill(255, 0, 0);
+      noStroke();
+
+      //move the dot to follow the square
+      dot.move();
+      dot.display();
+
+      //collision detection
+      for (int i=0; i<level.layout.size(); i++) { // iterate through all Obstacles, including walls
+        // see if Dot is hitting any of them
+        Obstacle testHit = (Obstacle) level.layout.get(i); // pull each Obstacle from level to test
+        if (dot.x + (dot.d * 0.5) > testHit.x && dot.x - (dot.d * 0.5)  < testHit.x + testHit.w && dot.y + (dot.d * 0.5) > testHit.y && dot.y - (dot.d * 0.5) < testHit.y + testHit.h) {
+          if (started) {
+            collide = true;
+            println("ouch!");
+            gameState = 2;
+          }
         }
       }
-    }
 
-    // set up, then display the level
-    level.display();
-
-    // draw a circle around reddest pixel
-    noFill();
-    stroke(0);
-    rectMode(CENTER); // little rectangle centered around reddest pixel
-    rect(reddestX, reddestY, 10, 10);
-    fill(255, 0, 0);
-    noStroke();
-
-    //move the dot to follow the rectangle
-    dot.move();
-    dot.display();
-
-    //collision detection
-    for (int i=0; i<level.layout.size(); i++) { // iterate through all Obstacles, including walls
-      // see if Dot is hitting any of them
-      Obstacle testHit = (Obstacle) level.layout.get(i); // pull each Obstacle from level to test
-      if(dot.x > testHit.x && dot.x < testHit.x + testHit.w && dot.y > testHit.y && dot.y < testHit.y + testHit.h){
-        collide = true;
-        println("ouch!");
+      //making it to the exit (only after round has started)
+      if (dot.x > 600 && dot.y + (dot.d * 0.5) < 120 && dot.y - (dot.d * 0.5) > 40 && started && !collide) {
+        round++;
+        gameState = 3;
       }
     }
+  }
+
+  // GAMESTATE 2: YOU LOSE -------------
+  if (gameState == 2) {
+    level.display();
+    noStroke();
+    fill(43, 75, 67); // turn circle green
+    ellipse(dot.x, dot.y, dot.d, dot.d);
+    fill(255);
+    text("Ouch!  You hit the wall!", width/2, height/2);
+    text("Press the space bar to start over", width/2, height/2 + 20);
+  }
+
+  // GAMESTATE 3: YOU WIN; GO TO NEXT ROUND -------------
+  if (gameState == 3) {
+    // reset everything for the next round (just once)
+    if (!nextLevel) {
+      determineNextLevel();
+      nextLevel = true;
+    }
+
+    // tell the player what the level will be
+    background(255);
+    text("Congratulations!", width/2, 20);
+    text("Get ready for the next round!", width/2, 60);
+    text("In the next round", width/2, 100);
+    text("Your up-down motion will be", width/2, 140);
+    if (pickUD) {
+      text("Normal", width/2, 180);
+    }
+    if (!pickUD) {
+      text("Reversed", width/2, 180);
+    }
+    text("Your left-right motion will be", width/2, 220);
+    if (pickLR) {
+      text("Normal", width/2, 260);
+    }
+    if (!pickLR) {
+      text("Reversed", width/2, 260);
+    }
+  } // end of gameState 3
+}
+
+
+void determineNextLevel() {
+  levelNumber = 1; //int(random(1, 1)); // will eventually be randomized
+  if (int(random(0, 2)) == 0) {
+    pickUD = true;
+  } 
+  else {
+    pickUD = false;
+  }
+  if (int(random(0, 2)) == 0) {
+    pickLR = true;
+  } 
+  else {
+    pickLR = false;
+  }
+  level = new Level(levelNumber, pickUD, pickLR); // create a brand new arrayList
+  level.setUpLevel(); // set up the new level
+}
+
+
+void keyPressed() {
+  if (key == ' ' && (gameState == 0 || gameState == 2)) {
+    gameState = 1;
+    round = 0;
+    collide = false;
+    started = false; // no collisions until the game officially begins
+    nextLevel = false; // allows next level to be picked in case of a win
+  }
+
+  if (key == ' ' && gameState == 3) {
+    gameState = 1;
+    started = false;
+    nextLevel = false; // allows new level to be picked in case of a win
   }
 }
 
