@@ -1,5 +1,5 @@
-// this version turns color tracker into drawing tool
-// smooths motion coming from color tracker by adding a guide
+// this version adds obstacles and levels
+
 // color tracker adapted from example by Daniel Shiffman,
 // available here:
 // http://www.learningprocessing.com/examples/chapter-16/example-16-11/
@@ -8,6 +8,7 @@
 
 import processing.video.*;
 
+Level level;
 Capture video;
 Dot dot;
 
@@ -24,6 +25,7 @@ void setup() {
   video.start();
 
   dot = new Dot(width/2, height/2);
+  level = new Level(1, true, true);
 
   background(255);  
   ellipseMode(CENTER);
@@ -70,6 +72,10 @@ void draw() {
         }
       }
     }
+    
+    // set up, then display the level
+    level.setUpLevel();
+    level.display();
 
     // draw a circle around reddest pixel
     noFill();
