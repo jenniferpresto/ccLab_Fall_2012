@@ -25,7 +25,7 @@
  * his notKirby sketch, available here:                                       *
  * https://github.com/jmatthewgriffis/notKirby/tree/master/game               *
  *                                                                            *
- * Final version                                                              *
+ * This version added calibration in gameState 1.                             *
  ******************************************************************************
  */
 
