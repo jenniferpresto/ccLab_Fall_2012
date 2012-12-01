@@ -1,0 +1,1 @@
+Translated an earlier Processing sketch into openFrameworks.  CCLab assignment, completed December 1, 2012.  Entire app folder is included here.
