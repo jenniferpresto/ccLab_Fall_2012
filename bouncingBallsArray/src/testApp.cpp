@@ -1,6 +1,10 @@
 /*
+ An Array of Bouncing Balls
+ Jennifer Presto
+ December 1, 2012
  
- 
+ Balls that bounce off the wall and each other;
+ Color changes on key press.
  
  */
 
