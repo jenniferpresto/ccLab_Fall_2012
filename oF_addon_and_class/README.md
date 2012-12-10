@@ -1,0 +1,1 @@
+Assignment for CCLab: use an add-on and a class in openFrameworks.
