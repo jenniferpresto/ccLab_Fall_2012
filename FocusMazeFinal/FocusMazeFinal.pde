@@ -3,9 +3,9 @@
 ******************************************************************************
  * Focus Maze                                                                 *
  * Jennifer G. Presto                                                         *
- * November __, 2012                                                          *
+ * December __, 2012                                                          *
  *                                                                            *
- * CCLab final                                                                *
+ * CCLab Final                                                                *
  *                                                                            *
  * Use a red wand (or calibrate the color of your choice) to move your dot    *
  * to the exit without touching any of the obstacles or the walls.            *
@@ -25,8 +25,17 @@
  * his notKirby sketch, available here:                                       *
  * https://github.com/jmatthewgriffis/notKirby/tree/master/game               *
  *                                                                            *
- * This version adds function for tracking pixels, mirror image in            *
- * calibration screen.                                                        *
+ * Twitter search code adapted from RobotGrrl.com                             *
+ * Code license under: CC-BY                                                  *
+ *                                                                            * 
+ * Source code available here:                                                *
+ * http://robotgrrl.com/blog/2011/02/21/simple-processing-twitter/            *
+ *                                                                            *
+ * Note that this uses an older version of the Twitter4j library              *
+ * than currently available on twitter4j.org.                                 *
+ *                                                                            *
+ * This version adds twitter feed, but it severely disrupts gameplay.         *
+ *                                                                            *
  ******************************************************************************
  */
 
@@ -43,6 +52,7 @@ boolean pickLR;       // for picking left-right motion of new levels
 
 Capture video;        // camera object; follows red wand
 Dot dot;              // this is you
+PImage target;        // this is the item you control with the wand
 PImage mirror;        // mirror image for calibration stage
 
 YahooWeather weather; // weather report
@@ -54,6 +64,14 @@ int[] woeid = {
 int woeidIndex;
 int weatherX;         // x coordinate of weather information
 
+Twitter twitter = new TwitterFactory().getInstance(); // twitter feed
+String user = "null";
+String latestTweet = "null";
+int lastTwitterUpdateTime;
+int twitterUpdateInterval;
+int whatTwitterSearch; // will randomly determine what word to search for
+String queryStr; // word to search Twitter for
+
 
 int loc;              // global variable for testing all pixels
 float closest;        // will be the "distance" from the tracked color
@@ -62,7 +80,7 @@ int closestY = 0;     // y coordinate of closest pixel
 
 color currentColor;   // testing all the pixels each frame
 
-color trackedColor;   // which color pixel to track (i.e., red)
+color trackedColor;   // which color pixel to track (defaults to red)
 
 boolean started;      // whether each level has started
 boolean collide;      // collision detection
@@ -92,6 +110,10 @@ void setup() {
   weather = new YahooWeather(this, woeid[woeidIndex], "f", updateIntervalMillis);
   weatherX = width; // initializing so starts offscreen
 
+  connectTwitter();
+  lastTwitterUpdateTime = millis();
+  twitterUpdateInterval = 10000; // new twitter search every 10 seconds
+
   //  The following items are all initialized in the keyPressed function below
   //  levelNumber = 1;
   //  level.setUpLevel();
@@ -103,8 +125,11 @@ void setup() {
   // first level, which will always be level 1, no reversing
   level = new Level(levelNumber, pickUD, pickLR);
 
+  target = loadImage("target.png");
+
   background(255);  
   ellipseMode(CENTER);
+  imageMode(CENTER);
   rectMode(CENTER);
   textAlign(CENTER);
 
@@ -157,8 +182,7 @@ void draw() {
     // draw a little square around pixel closest to calibrated color
     noFill();
     stroke(0);
-    rectMode(CENTER); // little square centered around pixel closest to calibrated color
-    rect(closestX, closestY, 10, 10);
+    image(target, closestX, closestY, 50, 50);
   } // end of gameState 1
 
 
@@ -173,8 +197,8 @@ void draw() {
     // draw a little square around pixel closest to calibrated color
     noFill();
     stroke(0);
-    rectMode(CENTER); // little square centered around pixel closest to calibrated color
-    rect(closestX, closestY, 10, 10);
+    //    rectMode(CENTER); // little square centered around pixel closest to calibrated color
+    image(target, closestX, closestY, 50, 50);
     fill(255, 0, 0);
     noStroke();
 
@@ -281,6 +305,10 @@ void draw() {
     text("Hit the space bar to continue.", width/2, 380);
   } // end of gameState 4
 } // end of draw function
+
+// Initial Twitter connection
+void connectTwitter() {
+}
 
 
 void determineNextLevel() {
@@ -390,4 +418,3 @@ void pixelTrack() {
     }
   } // end of looping through pixels
 }
-

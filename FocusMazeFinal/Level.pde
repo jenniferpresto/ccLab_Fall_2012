@@ -88,6 +88,7 @@ class Level {
     // and the level has been started
     if (round > 1 && started) {
       this.distractionScroll();
+      this.twitterDisplay();
     }
   }
 
@@ -116,8 +117,58 @@ class Level {
         woeidIndex = -1; // will be incremented to 0 immediately
       }
     }
-//    println(weatherX + " " + weather.getCityName() + "  " + weather.getTemperature());
-//    println(textWidth("City: " + weather.getCityName() + "Temperature: " + weather.getTemperature() + "F"));
+    //    println(weatherX + " " + weather.getCityName() + "  " + weather.getTemperature());
+    //    println(textWidth("City: " + weather.getCityName() + "Temperature: " + weather.getTemperature() + "F"));
+  }
+
+  void twitterDisplay() {
+    if (millis() -lastTwitterUpdateTime > twitterUpdateInterval) {
+      getSearchTweets();
+      println(millis() + " " + queryStr);
+      lastTwitterUpdateTime = millis();
+    }
+
+    fill(0, 200, 255); 
+    text("@" + user, 20, 50, width/2 - 60, height - 100); 
+    fill(255); 
+    text(latestTweet, 20, 150, width/2 - 60, height - 100);
+  }
+}
+
+// search for tweets
+void getSearchTweets() {
+  whatTwitterSearch = int(random(0, 5));
+  if (whatTwitterSearch == 0) {
+    queryStr = "balls";
+  }
+  if (whatTwitterSearch == 1) {
+    queryStr = "testicles";
+  }
+  if (whatTwitterSearch == 2) {
+    queryStr = "vagina";
+  }
+  if (whatTwitterSearch == 3) {
+    queryStr = "vomit";
+  }
+  if (whatTwitterSearch == 4) {
+    queryStr = "Obama";
+  }
+  try {
+    Query query = new Query(queryStr);    
+    query.setRpp(1); // Get 1 of the 100 search results  
+    QueryResult result = twitter.search(query);
+    ArrayList tweets = (ArrayList) result.getTweets();    
+    for (int i=0; i<tweets.size(); i++) {  
+      Tweet t = (Tweet)tweets.get(i);  
+      user = t.getFromUser();
+      latestTweet = t.getText();
+
+      println("@" + user);
+      println(latestTweet);
+    }
+  } 
+  catch (TwitterException e) {    
+    println("Search tweets: " + e);
   }
 }
 
