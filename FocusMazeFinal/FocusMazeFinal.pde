@@ -34,7 +34,7 @@
  * Note that this uses an older version of the Twitter4j library              *
  * than currently available on twitter4j.org.                                 *
  *                                                                            *
- * This version improves the progression of levels and difficulty.            *
+ * This version adds more attractive screens as transitions.                  *
  *                                                                            *
  ******************************************************************************
  */
@@ -68,6 +68,11 @@ PImage instruction1;
 PImage instruction2;
 PImage instructionLevel2;
 PImage allBetsOff;
+PImage getReady;
+PImage UDNormal;
+PImage UDReverse;
+PImage LRNormal;
+PImage LRReverse;
 
 YahooWeather weather;        // weather report
 int updateIntervalMillis;    // interval for updating the weather
@@ -121,7 +126,7 @@ void setup() {
   round = 1;
   dot = new Dot(width/2, height/2); // always start in the middle
 
-  updateIntervalMillis = 30000;     // updates every 30 seconds
+  updateIntervalMillis = 120000;     // updates every 2 minutes
   woeidIndex = 0;
   weather = new YahooWeather(this, woeid[woeidIndex], "f", updateIntervalMillis);
   weatherX = width; // initializing so starts offscreen
@@ -155,6 +160,12 @@ void setup() {
   instruction2 = loadImage("instruction2.png");
   instructionLevel2 = loadImage("instructionLevel2.png");
   allBetsOff = loadImage("allBetsOff.png");
+  getReady = loadImage("getReady.png");
+  UDNormal = loadImage("UDNormal.png");
+  UDReverse = loadImage("UDReverse.png");
+  LRNormal = loadImage("LRNormal.png");
+  LRReverse = loadImage("LRReverse.png");
+
 
   background(255);  
   ellipseMode(CENTER);
@@ -172,8 +183,6 @@ void setup() {
 }
 
 void draw() {
-
-  println("GameState: " + gameState + "; subState: " + subState);
   weather.update();
 
   // GAMESTATE 0: INSTRUCTIONS -------------
@@ -300,6 +309,8 @@ void draw() {
 
   // GAMESTATE 4: YOU WIN; GO TO NEXT ROUND -------------
   if (gameState == 4) {
+    // println("GameState: " + gameState + "; subState: " + subState + "; round: " + round + "nextLevel: " + nextLevel);
+
     // reset everything for the next round
     // (just once, hence the boolean nextLevel)
 
@@ -307,55 +318,40 @@ void draw() {
     // all mostion reversed
 
     if (!nextLevel && round == 2) {
-      //      nextLevel = true;
       pickUD = false;
       pickLR = false;
       level = new Level(1, pickUD, pickLR);
       level.setUpLevel();
       image(instructionLevel2, width/2, height/2);
+      nextLevel = true;
     }
 
     // tell player all bets are off
 
     else if (!nextLevel && round > 2 && subState == 0) {
-
       image(allBetsOff, width/2, height/2);
     }
 
     // set up next level and start again
 
     else if (!nextLevel && round > 2 && subState == 1) {
-
       determineNextLevel();
       nextLevel = true;
 
       // tell the player what the level will be
-      background(255);
-      fill(100);
-      textAlign(CENTER);
-      textFont(instructionFont);
-      text("Congratulations!", width/2, 60);
-      text("Get ready for the next round!", width/2, 100);
-      text("In the next round", width/2, 140);
-      text("Your up-down motion will be", width/2, 180);
-      fill(98, 102, 167);
+      image(getReady, width/2, height/2);
       if (pickUD) {
-        text("Normal", width/2, 230);
+        image(UDNormal, width/2, height/2);
       }
       if (!pickUD) {
-        text("Reversed", width/2, 230);
+        image(UDReverse, width/2, height/2);
       }
-      fill(100);
-      text("Your left-right motion will be", width/2, 280);
-      fill(98, 102, 167);
       if (pickLR) {
-        text("Normal", width/2, 330);
+        image(LRNormal, width/2, height/2);
       }
       if (!pickLR) {
-        text("Reversed", width/2, 330);
+        image(LRReverse, width/2, height/2);
       }
-      fill(100);
-      text("Hit the space bar to continue.", width/2, 380);
     }
   } // end of gameState 4
 } // end of draw function
@@ -411,11 +407,11 @@ void keyPressed() {
     dot.y = height/2;
   }
 
-  else if (key == ' ' && gameState == 4 && subState == 0) {
+  else if (key == ' ' && gameState == 4 && round == 3 && subState == 0) {
     subState = 1;
   }
 
-  else if (key == ' ' && gameState == 4 && subState == 1) {
+  else if (key == ' ' && gameState == 4) {
     gameState = 2;
     started = false;
     nextLevel = false; // allows new level to be picked in case of a win
