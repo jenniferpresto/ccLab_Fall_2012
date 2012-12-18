@@ -4,6 +4,14 @@ class Level {
   boolean normalLR;
   ArrayList layout;
   color c;
+  float twitterUserX;
+  float twitterUserY;
+  float twitterUserW;
+  float twitterUserH;
+  float tweetX;
+  float tweetY;
+  float tweetW;
+  float tweetH;
 
   Level (int _whichLevel, boolean _normalUD, boolean _normalLR) {
     whichLevel = _whichLevel;
@@ -14,94 +22,138 @@ class Level {
   }
 
   void setUpLevel() {
-    background(100); //gray
-    if (whichLevel == 1) {
-      c = color(227, 133, 225); // pink
-      setUpWalls();
-      layout.add(new Obstacle(120, 60, 140, 200));
+    getSearchTweets();                 // pull new set of tweets
+    lastTwitterUpdateTime = millis();  // reset timer for Twitter feed
+    setUpWalls();                      // outer walls same for all levels
+
+      if (whichLevel == 1) {
+      twitterUserX = 110;
+      twitterUserY = 50;
+      twitterUserW = 140;
+      twitterUserH = 20;
+      tweetX = 110;
+      tweetY = 80;
+      tweetW = 140;
+      tweetH = 150;
+      layout.add(new Obstacle(100, 40, 160, 200));
       layout.add(new Obstacle(380, 120, 160, 40));
-      layout.add(new Obstacle(320, 280, 240, 80));
+      layout.add(new Obstacle(340, 280, 220, 100));
     }
 
     if (whichLevel == 2) {
-      c = color(216, 202, 74); // mustard
-      setUpWalls();
-      layout.add(new Obstacle(80, 160, 200, 60));
-      layout.add(new Obstacle(180, 240, 90, 170));
-      layout.add(new Obstacle(370, 120, 50, 260));
-      layout.add(new Obstacle(500, 80, 40, 60));
-      layout.add(new Obstacle(500, 200, 80, 40));
+      twitterUserX = 150;
+      twitterUserY = 190;
+      twitterUserW = 150;
+      twitterUserH = 20;
+      tweetX = 150;
+      tweetY = 210;
+      tweetW = 150;
+      tweetH = 140;
+      layout.add(new Obstacle(140, 180, 170, 180));
+      layout.add(new Obstacle(200, 40, 200, 60));
+      layout.add(new Obstacle(390, 160, 40, 60));
+      layout.add(new Obstacle(430, 320, 70, 40));
+      layout.add(new Obstacle(500, 100, 40, 260));
     }
 
     if (whichLevel == 3) {
-      c = color(201, 70, 35); // burnt orange
-      setUpWalls();
-      layout.add(new Obstacle(90, 110, 120, 200));
-      layout.add(new Obstacle(280, 60, 210, 190));
-      layout.add(new Obstacle(130, 350, 230, 50));
-      layout.add(new Obstacle(420, 300, 140, 110));
+      twitterUserX = 320;
+      twitterUserY = 130;
+      twitterUserW = 190;
+      twitterUserH = 20;
+      tweetX = 320;
+      tweetY = 150;
+      tweetW = 190;
+      tweetH = 140;
+      layout.add(new Obstacle(310, 120, 210, 180));
+      layout.add(new Obstacle(90, 180, 120, 110));
+      layout.add(new Obstacle(210, 350, 100, 90));
     }
 
     if (whichLevel == 4) {
-      c = color(117, 40, 102); // purple-gray  
-      setUpWalls();
-      layout.add(new Obstacle(170, 60, 180, 40));
-      layout.add(new Obstacle(170, 160, 250, 60));
-      layout.add(new Obstacle(70, 290, 320, 50));
-      layout.add(new Obstacle(460, 90, 70, 330));
+      twitterUserX = 400;
+      twitterUserY = 110;
+      twitterUserW = 110;
+      twitterUserH = 30;
+      tweetX = 400;
+      tweetY = 150;
+      tweetW = 110;
+      tweetH = 190;
+      layout.add(new Obstacle(40, 230, 100, 50));
+      layout.add(new Obstacle(90, 90, 180, 40));
+      layout.add(new Obstacle(230, 240, 70, 200));
+      layout.add(new Obstacle(390, 100, 130, 250));
     }
   }
 
   void display() {
-    // main part of the level (including walls)
-    if (started) {
-      background(98, 102, 167);
-    }
+
+    // background color always starts the same;
+    // once player starts the level,
+    // background color varies depending on the level itself
+
     if (!started) {
-      background(100);
+      background(33, 17, 17);
     }
-    fill(c);
+
+    if (started && (whichLevel == 1 || whichLevel == 3)) {
+      background(14, 26, 33);
+    }
+
+    if (started && (whichLevel == 2 || whichLevel == 4)) {
+      // background(48, 20, 20);
+      // background (45, 39, 17); // mossy green
+      background (34, 15, 36); // deep purple
+    }
+
+    // main part of the level (including walls)
+
+    image(clouds, width/2, height/2);
     noStroke();
     for (int i=0; i<layout.size(); i++) {
       Obstacle eachObstacle = (Obstacle) layout.get(i);
       eachObstacle.display();
     }
 
-    // white start box in bottom left corner of every level
     rectMode(CORNER);
-    fill(255);
-    stroke(0);
-    strokeWeight(2);
-    rect(40, 370, 70, 70);
-    fill(0);
-    textFont(smallestFont);
     textAlign(CENTER);
+    textFont(smallestFont);
+    fill(255);
 
-    // explanatory text on the level
-    text("Round: " + round, 45, 20);
-    text("Exit -->", 575, 80);
-    // start text only if not yet started level
+    // white start box in bottom left corner of every level
+    // until player starts
+
     if (!started) {
+      stroke(0);
+      strokeWeight(2);
+      rect(40, 370, 70, 70);
       text("<-- Start here!", 175, 425);
     }
-    // scrolling distraction only if not the first round
-    // and the level has been started
+
+    // explanatory text on the level
+    // stays
+
+    text("Round: " + round, 45, 20);
+    text("Exit -->", 575, 80);
+
+    // distraction begins only if not the first round
+    // and the player has started
     if (round > 1 && started) {
       this.distractionScroll();
       this.twitterDisplay();
     }
   }
 
-  void setUpWalls() { //these are the same for every level
-    layout.add(new Obstacle(0, 0, 40, 480));     // left wall
-    layout.add(new Obstacle(40, 0, 600, 40));    // top wall
+  void setUpWalls() {  // outer walls; same for every level
+    layout.add(new Obstacle(0, 0, 40, 480));      // left wall
+    layout.add(new Obstacle(40, 0, 600, 40));     // top wall
     layout.add(new Obstacle(600, 120, 40, 320));  // right wall
-    layout.add(new Obstacle(40, 440, 600, 40));  // bottom wall
+    layout.add(new Obstacle(40, 440, 600, 40));   // bottom wall
   }
 
   void distractionScroll() {
     textAlign(LEFT);
-    fill(0);
+    //    fill(0);
     text("City: " + weather.getCityName() + "    Temp: " + weather.getTemperature() + " F", weatherX, 465);
     if (gameState==2) { // scrolls only when actively playing
       weatherX-=4;
@@ -122,16 +174,22 @@ class Level {
   }
 
   void twitterDisplay() {
-    if (millis() -lastTwitterUpdateTime > twitterUpdateInterval) {
-      getSearchTweets();
-      println(millis() + " " + queryStr);
-      lastTwitterUpdateTime = millis();
+    textFont(twitterFont);
+    for (int i = 0; i<numTweets; i++) {
+      int currentTwitterTime = millis() - lastTwitterUpdateTime;
+      if (i < numTweets - 1 && currentTwitterTime > (i* twitterUpdateInterval) && currentTwitterTime < (i+1) * twitterUpdateInterval) {
+        fill(0, 200, 255); 
+        text("@" + user[i], twitterUserX, twitterUserY, twitterUserW, twitterUserH); 
+        fill(255); 
+        text(latestTweet[i], tweetX, tweetY, tweetW, tweetH);
+      }
+      if (i == numTweets - 1 && currentTwitterTime >= (i+1) * twitterUpdateInterval) {
+        fill(0, 200, 255); 
+        text("@" + user[i], twitterUserX, twitterUserY, twitterUserW, twitterUserH); 
+        fill(255); 
+        text(latestTweet[i], tweetX, tweetY, tweetW, tweetH);
+      }
     }
-
-    fill(0, 200, 255); 
-    text("@" + user, 20, 50, width/2 - 60, height - 100); 
-    fill(255); 
-    text(latestTweet, 20, 150, width/2 - 60, height - 100);
   }
 }
 
@@ -142,29 +200,29 @@ void getSearchTweets() {
     queryStr = "balls";
   }
   if (whatTwitterSearch == 1) {
-    queryStr = "testicles";
+    queryStr = "fiscal cliff";
   }
   if (whatTwitterSearch == 2) {
-    queryStr = "vagina";
+    queryStr = "boehner";
   }
   if (whatTwitterSearch == 3) {
-    queryStr = "vomit";
+    queryStr = "coulter";
   }
   if (whatTwitterSearch == 4) {
-    queryStr = "Obama";
+    queryStr = "obama";
   }
   try {
     Query query = new Query(queryStr);    
-    query.setRpp(1); // Get 1 of the 100 search results  
+    query.setRpp(numTweets); // Get certain number of the 100 search results  
     QueryResult result = twitter.search(query);
     ArrayList tweets = (ArrayList) result.getTweets();    
     for (int i=0; i<tweets.size(); i++) {  
       Tweet t = (Tweet)tweets.get(i);  
-      user = t.getFromUser();
-      latestTweet = t.getText();
+      user[i] = t.getFromUser();
+      latestTweet[i] = t.getText();
 
       println("@" + user);
-      println(latestTweet);
+      println(latestTweet[i]);
     }
   } 
   catch (TwitterException e) {    

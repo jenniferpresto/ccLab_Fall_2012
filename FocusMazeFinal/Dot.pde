@@ -8,7 +8,7 @@ class Dot {
   Dot(float _x, float _y) {
     x = _x;
     y = _y;
-    d = 10;
+    d = 25;
     speed = 3;
   }
 
@@ -28,7 +28,12 @@ class Dot {
   }
 
   void display() {
-    ellipse(x, y, d, d);
+    if (gameState != 3) {
+      image(happyYou, x, y, d, d);
+    }
+    if (gameState == 3) {
+      image(sadYou, x, y, d, d);
+    }
   }
 }
 

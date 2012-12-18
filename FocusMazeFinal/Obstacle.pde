@@ -9,9 +9,14 @@ class Obstacle {
   }
 
   void display() {
-    rectMode(CORNER); // only Obstacles use corner mode when displaying
     noStroke();
-    rect(x, y, w, h);
+    beginShape();
+    texture(bricks);
+    vertex(x, y, x, y);
+    vertex(x+w, y, x+w, y);
+    vertex(x+w, y+h, x+w, y+h);
+    vertex(x, y+h, x, y+h);
+    endShape();
   }
 }
 
