@@ -34,7 +34,7 @@
  * Note that this uses an older version of the Twitter4j library              *
  * than currently available on twitter4j.org.                                 *
  *                                                                            *
- * This version incorporates some nicer graphics screens.                     *
+ * This version improves the progression of levels and difficulty.            *
  *                                                                            *
  ******************************************************************************
  */
@@ -66,6 +66,8 @@ PImage clouds;
 PImage titlePage;
 PImage instruction1;
 PImage instruction2;
+PImage instructionLevel2;
+PImage allBetsOff;
 
 YahooWeather weather;        // weather report
 int updateIntervalMillis;    // interval for updating the weather
@@ -151,6 +153,8 @@ void setup() {
   titlePage = loadImage("titlePage.png");
   instruction1 = loadImage("instruction1.png");
   instruction2 = loadImage("instruction2.png");
+  instructionLevel2 = loadImage("instructionLevel2.png");
+  allBetsOff = loadImage("allBetsOff.png");
 
   background(255);  
   ellipseMode(CENTER);
@@ -168,9 +172,9 @@ void setup() {
 }
 
 void draw() {
+
+  println("GameState: " + gameState + "; subState: " + subState);
   weather.update();
-  // Keeping track of what's going on
-  //  println("Game State: " + gameState + "    Level: " + level.whichLevel + "   number of Obstacles:" + level.layout.size());
 
   // GAMESTATE 0: INSTRUCTIONS -------------
   if (gameState == 0 && subState == 0) {
@@ -182,7 +186,7 @@ void draw() {
   if (gameState == 0 && subState == 2) {
     image(instruction2, width/2, height/2);
   }
-  
+
   // GAMESTATE 1: CALIBRATE THE WAND ------------
   if (gameState == 1) {
 
@@ -210,7 +214,8 @@ void draw() {
 
   // GAMESTATE 2: STARTING AND PLAYING GAME ------------
   if (gameState == 2) {
-    // function to track pixel of selected color
+
+    // track pixel of selected color
     pixelTrack();
 
     // display the current level
@@ -219,7 +224,7 @@ void draw() {
     // draw the target around pixel closest to calibrated color
     image(target, closestX, closestY, 50, 50);
 
-    //move the dot to follow the square
+    //move Sam to follow the target
     dot.move();
     dot.display();
 
@@ -257,7 +262,6 @@ void draw() {
       text("Go!", width/2, height/2);
     }
 
-
     //collision detection (only after round has started)
     for (int i=0; i<level.layout.size(); i++) { // iterate through all Obstacles, including walls
       // see if Dot is hitting any of them
@@ -291,44 +295,68 @@ void draw() {
     text("Ouch!  You hit the wall!", width/2, height/2);
     text("Press the space bar to start over", width/2, height/2 + 30);
     text("with normal movement.", width/2, height/2 + 60);
+    subState = 0;
   }
 
   // GAMESTATE 4: YOU WIN; GO TO NEXT ROUND -------------
   if (gameState == 4) {
     // reset everything for the next round
     // (just once, hence the boolean nextLevel)
-    if (!nextLevel) {
-      determineNextLevel();
-      nextLevel = true;
+
+    // if it's the first time, level 1,
+    // all mostion reversed
+
+    if (!nextLevel && round == 2) {
+      //      nextLevel = true;
+      pickUD = false;
+      pickLR = false;
+      level = new Level(1, pickUD, pickLR);
+      level.setUpLevel();
+      image(instructionLevel2, width/2, height/2);
     }
 
-    // tell the player what the level will be
-    background(255);
-    fill(100);
-    textAlign(CENTER);
-    textFont(instructionFont);
-    text("Congratulations!", width/2, 60);
-    text("Get ready for the next round!", width/2, 100);
-    text("In the next round", width/2, 140);
-    text("Your up-down motion will be", width/2, 180);
-    fill(98, 102, 167);
-    if (pickUD) {
-      text("Normal", width/2, 230);
+    // tell player all bets are off
+
+    else if (!nextLevel && round > 2 && subState == 0) {
+
+      image(allBetsOff, width/2, height/2);
     }
-    if (!pickUD) {
-      text("Reversed", width/2, 230);
+
+    // set up next level and start again
+
+    else if (!nextLevel && round > 2 && subState == 1) {
+
+      determineNextLevel();
+      nextLevel = true;
+
+      // tell the player what the level will be
+      background(255);
+      fill(100);
+      textAlign(CENTER);
+      textFont(instructionFont);
+      text("Congratulations!", width/2, 60);
+      text("Get ready for the next round!", width/2, 100);
+      text("In the next round", width/2, 140);
+      text("Your up-down motion will be", width/2, 180);
+      fill(98, 102, 167);
+      if (pickUD) {
+        text("Normal", width/2, 230);
+      }
+      if (!pickUD) {
+        text("Reversed", width/2, 230);
+      }
+      fill(100);
+      text("Your left-right motion will be", width/2, 280);
+      fill(98, 102, 167);
+      if (pickLR) {
+        text("Normal", width/2, 330);
+      }
+      if (!pickLR) {
+        text("Reversed", width/2, 330);
+      }
+      fill(100);
+      text("Hit the space bar to continue.", width/2, 380);
     }
-    fill(100);
-    text("Your left-right motion will be", width/2, 280);
-    fill(98, 102, 167);
-    if (pickLR) {
-      text("Normal", width/2, 330);
-    }
-    if (!pickLR) {
-      text("Reversed", width/2, 330);
-    }
-    fill(100);
-    text("Hit the space bar to continue.", width/2, 380);
   } // end of gameState 4
 } // end of draw function
 
@@ -338,7 +366,7 @@ void connectTwitter() {
 
 
 void determineNextLevel() {
-  levelNumber = int(random(1, 5)); // depends on how many levels there are
+  levelNumber = int(random(2, 5)); // depends on how many levels there are; don't pick level 1 again
   if (int(random(0, 2)) == 0) {
     pickUD = true;
   } 
@@ -358,30 +386,20 @@ void determineNextLevel() {
 
 void keyPressed() {
 
-  // had to add "else" after first condition to prevent it from
-  // going straight to gameState 2 from gameState 0 
-
   if (key == ' ' && gameState == 0 && subState == 0) {
-//    gameState = 0;
     subState = 1;
   } 
-  
-  else
 
-  if (key == ' ' && gameState == 0 && subState == 1) {
-//    gameState = 0;
+  else if (key == ' ' && gameState == 0 && subState == 1) {
     subState = 2;
   } 
-  
-  else
 
-  if (key == ' ' && gameState == 0 && subState == 2) {
+  else if (key == ' ' && gameState == 0 && subState == 2) {
     gameState = 1;
+    subState = 0;
   } 
 
-  else // note: added this "else" because wasn't working without it
-
-  if (key == ' ' && (gameState == 1 || gameState == 3)) {
+  else if (key == ' ' && (gameState == 1 || gameState == 3)) {
     gameState = 2;
     round = 1;
     collide = false;
@@ -393,7 +411,11 @@ void keyPressed() {
     dot.y = height/2;
   }
 
-  if (key == ' ' && gameState == 4) {
+  else if (key == ' ' && gameState == 4 && subState == 0) {
+    subState = 1;
+  }
+
+  else if (key == ' ' && gameState == 4 && subState == 1) {
     gameState = 2;
     started = false;
     nextLevel = false; // allows new level to be picked in case of a win
@@ -401,6 +423,7 @@ void keyPressed() {
     dot.y = height/2;
   }
 }
+
 
 void mousePressed() {
   // for calibration in gameState 1; uses mirror of video image
@@ -456,6 +479,6 @@ void pixelTrack() {
         closestY = y;
       }
     }
-  } // end of looping through pixels
+  }
 }
 

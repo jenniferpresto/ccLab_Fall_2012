@@ -36,8 +36,8 @@ class Level {
       tweetW = 140;
       tweetH = 150;
       layout.add(new Obstacle(100, 40, 160, 200));
-      layout.add(new Obstacle(380, 120, 160, 40));
-      layout.add(new Obstacle(340, 280, 220, 100));
+      layout.add(new Obstacle(430, 160, 110, 40));
+      layout.add(new Obstacle(390, 280, 170, 100));
     }
 
     if (whichLevel == 2) {
@@ -136,9 +136,10 @@ class Level {
     text("Round: " + round, 45, 20);
     text("Exit -->", 575, 80);
 
-    // distraction begins only if not the first round
-    // and the player has started
-    if (round > 1 && started) {
+    // distraction begins only if not one of the 
+    // first two rounds and the player has started
+
+    if (round > 2 && started) {
       this.distractionScroll();
       this.twitterDisplay();
     }
@@ -191,42 +192,42 @@ class Level {
       }
     }
   }
-}
 
-// search for tweets
-void getSearchTweets() {
-  whatTwitterSearch = int(random(0, 5));
-  if (whatTwitterSearch == 0) {
-    queryStr = "balls";
-  }
-  if (whatTwitterSearch == 1) {
-    queryStr = "fiscal cliff";
-  }
-  if (whatTwitterSearch == 2) {
-    queryStr = "boehner";
-  }
-  if (whatTwitterSearch == 3) {
-    queryStr = "coulter";
-  }
-  if (whatTwitterSearch == 4) {
-    queryStr = "obama";
-  }
-  try {
-    Query query = new Query(queryStr);    
-    query.setRpp(numTweets); // Get certain number of the 100 search results  
-    QueryResult result = twitter.search(query);
-    ArrayList tweets = (ArrayList) result.getTweets();    
-    for (int i=0; i<tweets.size(); i++) {  
-      Tweet t = (Tweet)tweets.get(i);  
-      user[i] = t.getFromUser();
-      latestTweet[i] = t.getText();
 
-      println("@" + user);
-      println(latestTweet[i]);
+  // search for tweets
+  void getSearchTweets() {
+    whatTwitterSearch = int(random(0, 5));
+    if (whatTwitterSearch == 0) {
+      queryStr = "balls";
     }
-  } 
-  catch (TwitterException e) {    
-    println("Search tweets: " + e);
+    if (whatTwitterSearch == 1) {
+      queryStr = "fiscal cliff";
+    }
+    if (whatTwitterSearch == 2) {
+      queryStr = "boehner";
+    }
+    if (whatTwitterSearch == 3) {
+      queryStr = "coulter";
+    }
+    if (whatTwitterSearch == 4) {
+      queryStr = "obama";
+    }
+    try {
+      Query query = new Query(queryStr);    
+      query.setRpp(numTweets); // Get certain number of the 100 search results  
+      QueryResult result = twitter.search(query);
+      ArrayList tweets = (ArrayList) result.getTweets();    
+      for (int i=0; i<tweets.size(); i++) {  
+        Tweet t = (Tweet)tweets.get(i);  
+        user[i] = t.getFromUser();
+        latestTweet[i] = t.getText();
+
+        //      println("@" + user);
+        //      println(latestTweet[i]);
+      }
+    } 
+    catch (TwitterException e) {    
+      println("Search tweets: " + e);
+    }
   }
 }
-
