@@ -1,4 +1,4 @@
-// this is the player
+// this is Sam
 
 class Dot {
   float x, y; //position

@@ -84,6 +84,19 @@ class Level {
       layout.add(new Obstacle(230, 240, 70, 200));
       layout.add(new Obstacle(390, 100, 130, 250));
     }
+
+    if (whichLevel == 5) {
+      twitterUserX = 130;
+      twitterUserY = 130;
+      twitterUserW = 460;
+      twitterUserH = 20;
+      tweetX = 130;
+      tweetY = 150;
+      tweetW = 460;
+      tweetH = 60;
+      layout.add(new Obstacle(120, 120, 480, 90));
+      layout.add(new Obstacle(40, 300, 410, 50));
+    }
   }
 
   void display() {
@@ -96,7 +109,7 @@ class Level {
       background(33, 17, 17);
     }
 
-    if (started && (whichLevel == 1 || whichLevel == 3)) {
+    if (started && (whichLevel == 1 || whichLevel == 3 || whichLevel == 5)) {
       background(14, 26, 33);
     }
 
@@ -231,3 +244,4 @@ class Level {
     }
   }
 }
+
