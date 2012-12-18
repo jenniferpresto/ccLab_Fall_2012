@@ -3,7 +3,7 @@
 ******************************************************************************
  * Focus Maze                                                                 *
  * Jennifer G. Presto                                                         *
- * December 17, 2012                                                          *
+ * December 18, 2012                                                          *
  *                                                                            *
  * CCLab Final                                                                *
  *                                                                            *
@@ -33,8 +33,6 @@
  *                                                                            *
  * Note that this uses an older version of the Twitter4j library              *
  * than currently available on twitter4j.org.                                 *
- *                                                                            *
- * This version adds more attractive screens as transitions.                  *
  *                                                                            *
  ******************************************************************************
  */
@@ -211,7 +209,7 @@ void draw() {
     }
     updatePixels(); // updates pixels in display window
 
-    // draw a little square around pixel closest to calibrated color
+    // draw the target around pixel closest to calibrated color
     noFill();
     stroke(0);
     image(target, closestX, closestY, 50, 50);
@@ -309,7 +307,6 @@ void draw() {
 
   // GAMESTATE 4: YOU WIN; GO TO NEXT ROUND -------------
   if (gameState == 4) {
-    // println("GameState: " + gameState + "; subState: " + subState + "; round: " + round + "nextLevel: " + nextLevel);
 
     // reset everything for the next round
     // (just once, hence the boolean nextLevel)
@@ -362,7 +359,7 @@ void connectTwitter() {
 
 
 void determineNextLevel() {
-  levelNumber = int(random(2, 5)); // depends on how many levels there are; don't pick level 1 again
+  levelNumber = int(random(2, 6)); // depends on how many levels there are; won't pick level 1 again
   if (int(random(0, 2)) == 0) {
     pickUD = true;
   } 
